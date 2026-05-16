@@ -1,13 +1,17 @@
 import { notFound } from "next/navigation";
 
+import connectDB from "@/lib/db";
+import Blog from "@/models/Blog";
+
 async function getPost(slug: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/posts/${slug}`,
-    { cache: "no-store" }
-  );
-
-  if (!res.ok) return null;
-
-  return res.json();
+  try {
+    await connectDB();
+    const post = await Blog.findOne({ slug }).lean();
+    return post as any;
+  } catch (error) {
+    console.error(`Error fetching post ${slug}:`, error);
+    return null;
+  }
 }
 
 export default async function BlogPost({ params }: any) {

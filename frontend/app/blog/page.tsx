@@ -1,13 +1,19 @@
 import Link from "next/link";
 
+import connectDB from "@/lib/db";
+import Blog from "@/models/Blog";
+
+export const dynamic = 'force-dynamic';
+
 async function getPosts() {
-   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/posts`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) return [];
-
-  return res.json();
+  try {
+    await connectDB();
+    const posts = await Blog.find({}).lean();
+    return posts as any[];
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return [];
+  }
 }
 
 function getImage(slug: string) {
